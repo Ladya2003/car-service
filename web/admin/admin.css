@@ -24,3 +24,5 @@
   .calendar-toolbar input{width:auto}
   .admin-dialog .panel-actions{align-items:stretch}
 }
+
+.password-control{position:relative;min-width:0}.field .password-control input{padding-right:112px}.password-visibility{position:absolute;right:5px;top:5px;bottom:5px;min-width:96px;border:0;border-radius:6px;padding:0 10px;background:#edf2e3;color:var(--ink);font-size:14px;font-weight:500;line-height:1.4}.password-visibility:hover{background:#e0ebcc}.password-visibility:focus-visible{outline-offset:1px}

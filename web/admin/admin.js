@@ -15,7 +15,13 @@ async function authorized(path,options={}){try{return await api(path,{...options
 function login(message=''){
 root.replaceChildren();const shell=el('main','login-shell'),brand=el('a','brand');brand.href='../';brand.append(el('span','brand-symbol','↗'),document.createTextNode('смена'));shell.append(brand);
 const card=el('section','login-card');card.append(el('p','eyebrow','Кабинет сотрудника · демо'),el('h1','','Хорошая смена\nначинается здесь.'),el('p','login-description','Расписание, заявки и контакты клиентов — в одном месте.'));
-const form=el('form'),password=input('password','','password');password.required=true;password.autocomplete='current-password';password.placeholder='Введите пароль';password.id='admin-password';form.append(field('Пароль администратора',password));
+const form=el('form'),password=input('password','','password');password.required=true;password.autocomplete='current-password';password.placeholder='Введите пароль';password.id='admin-password';
+const passwordField=el('div','field'),passwordLabel=el('label','','Пароль администратора');passwordLabel.htmlFor=password.id;
+const passwordControl=el('div','password-control'),visibility=button('Показать','password-visibility',()=>{
+const visible=password.type==='password';password.type=visible?'text':'password';visibility.textContent=visible?'Скрыть':'Показать';visibility.setAttribute('aria-label',visible?'Скрыть пароль':'Показать пароль');visibility.setAttribute('aria-pressed',String(visible));
+});
+visibility.setAttribute('aria-label','Показать пароль');visibility.setAttribute('aria-controls',password.id);visibility.setAttribute('aria-pressed','false');
+passwordControl.append(password,visibility);passwordField.append(passwordLabel,passwordControl);form.append(passwordField);
 const err=errorBox();err.textContent=message;const submit=el('button','button','Войти в кабинет ↗');submit.type='submit';form.append(err,submit);form.onsubmit=async event=>{event.preventDefault();if(!form.reportValidity())return;submit.disabled=true;err.textContent='';try{const r=await api('/admin/login',{method:'POST',body:JSON.stringify({password:password.value})});token=r.token;sessionStorage.setItem('smena-admin-token',token);await load();}catch(e){err.textContent=e.message;}finally{submit.disabled=false;}};
 card.append(form,el('p','login-note','Пароль выдаёт владелец демонстрации. Данные Amorely для входа не используются.'));shell.append(card);const back=el('a','back-link','← На сайт автосервиса');back.href='../';shell.append(back);root.append(shell);
 }
