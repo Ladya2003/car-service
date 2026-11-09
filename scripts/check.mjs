@@ -1,0 +1,5 @@
+import fs from 'node:fs';import path from 'node:path';import{spawnSync}from'node:child_process';import assert from'node:assert/strict';
+const root=path.resolve(import.meta.dirname,'..');function walk(dir){return fs.readdirSync(dir,{withFileTypes:true}).flatMap(e=>e.isDirectory()?walk(path.join(dir,e.name)):[path.join(dir,e.name)]);}
+for(const file of walk(path.join(root,'web')).filter(f=>f.endsWith('.js'))){const r=spawnSync(process.execPath,['--check',file],{encoding:'utf8',windowsHide:true});assert.equal(r.status,0,r.stderr);}
+let count=0;for(const file of walk(path.join(root,'dist')).filter(f=>f.endsWith('.html'))){const html=fs.readFileSync(file,'utf8');for(const m of html.matchAll(/(?:src|href)="([^"]+)"/g)){const url=m[1].split(/[?#]/)[0];if(!url||/^(?:https?:|tel:|mailto:|data:)/.test(url))continue;const target=path.resolve(path.dirname(file),url);assert.ok(fs.existsSync(target),'Missing '+url+' in '+file);}assert.match(html,/<title>[^<]+<\/title>/);assert.match(html,/name="viewport"/);count++;}
+console.log(JSON.stringify({ok:true,jsSyntax:'passed',htmlPages:count,internalLinksAndAssets:'passed'}));

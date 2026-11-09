@@ -1,0 +1,6 @@
+dist/
+.runtime/
+.env
+.env.local
+MVP-access.local.txt
+node_modules/
