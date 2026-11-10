@@ -54,3 +54,6 @@
   .menu-toggle{flex:none}
   .hero h1{font-size:clamp(39px,12vw,47px)}
 }
+
+/* Vector icons render consistently across system fonts, including iOS. */
+.ui-icon{display:inline-block;width:1em;height:1em;flex-shrink:0;vertical-align:-.15em;pointer-events:none}.brand-symbol .ui-icon{width:26px;height:26px}.service-icon .ui-icon{width:32px;height:32px}.menu-toggle .ui-icon{width:22px;height:22px}.button>.ui-icon,.back-button>.ui-icon,.back-link>.ui-icon{width:20px;height:20px}.hero-points span:before{content:'';display:inline-block;width:14px;height:14px;vertical-align:-2px;background:currentColor;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m5 12 4 4L19 6' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m5 12 4 4L19 6' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat}.service-card-bottom button{display:grid;place-items:center}.service-card-bottom button .ui-icon{width:22px;height:22px}.demo-bar a,.back-link{display:inline-flex;align-items:center;gap:7px}.panel-success-icon .ui-icon{width:32px;height:32px}

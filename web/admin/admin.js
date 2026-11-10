@@ -1,10 +1,11 @@
+﻿import { icon } from '../lib/icons.js';
 import { api, money, dateLabel, element as el, requestId } from '../lib/api.js';
 const root=document.querySelector('#admin-root'),toast=document.querySelector('#toast');
 let token=sessionStorage.getItem('smena-admin-token')||'',state=null,tab='bookings',filter='all',search='',date='',calendarDate=new Date(Date.now()+3*3600000).toISOString().slice(0,10),loading=false;
 const labels={new:'Новая',confirmed:'Подтверждена',completed:'Выполнена',cancelled:'Отменена',no_show:'Неявка'};
 const today=()=>new Date(Date.now()+3*3600000).toISOString().slice(0,10);
 const addDays=(d,n)=>new Date(new Date(d+'T12:00:00Z').getTime()+n*86400000).toISOString().slice(0,10);
-const button=(text,cls,fn)=>{const b=el('button',cls,text);b.type='button';if(fn)b.onclick=fn;return b;};
+const button=(text,cls,fn)=>{const b=el('button',cls,text);b.type='button';if(text==='←')b.setAttribute('aria-label','Предыдущий день');if(text==='→')b.setAttribute('aria-label','Следующий день');if(text==='×')b.setAttribute('aria-label','Открыть время для записи');if(fn)b.onclick=fn;return b;};
 const errorBox=()=>{const e=el('div','form-error');e.setAttribute('role','alert');return e;};
 function notify(text){toast.textContent=text;toast.hidden=false;clearTimeout(notify.timer);notify.timer=setTimeout(()=>toast.hidden=true,4000);}
 function field(label,control){const w=el('label','field');w.append(el('span','',label),control);return w;}
@@ -82,13 +83,14 @@ for(const event of events){if(event.type==='block'){const item=el('div','calenda
 function newBlock(defaultDate=today()){
 const d=dialog('Закрыть время','Перерыв закроет запись на всех постах.'),form=el('form'),date=input('date',defaultDate,'date'),start=input('start','15:00','time'),end=input('end','16:00','time'),reason=input('reason');date.required=true;date.min=today();date.max=addDays(today(),59);start.required=true;end.required=true;start.step=end.step='1800';reason.maxLength=100;reason.placeholder='Например, обслуживание оборудования';const pair=el('div','form-pair');pair.append(field('С',start),field('До',end));form.append(field('Дата',date),pair,field('Причина',reason));const err=errorBox(),submit=el('button','button','Закрыть время');submit.type='submit';submit.style.marginTop='22px';form.append(err,submit);form.onsubmit=async e=>{e.preventDefault();if(!form.reportValidity())return;submit.disabled=true;err.textContent='';try{await authorized('/admin/blocks',{method:'POST',body:JSON.stringify({date:date.value,start:start.value,end:end.value,reason:reason.value})});d.close();notify('Время закрыто');await load();}catch(error){err.textContent=error.message;}finally{submit.disabled=false;}};d.append(form);
 }
+function integrationIcon(){const node=el('div','integration-icon');node.append(icon('send'));return node;}
 function renderSettings(main){
 const layout=el('div','settings-grid'),card=el('section','admin-card settings-card');card.append(el('h2','','Рабочее расписание'),el('p','settings-description','Общее расписание определяет доступное клиентам время. Изменения не должны конфликтовать с существующими записями.'));
 const form=el('form'),s=state.settings,pair=el('div','form-pair'),open=input('open',s.open,'time'),close=input('close',s.close,'time');open.required=close.required=true;open.step=close.step='1800';pair.append(field('Открытие',open),field('Закрытие',close));form.append(pair);
 const days=el('fieldset','weekday-fields');days.append(el('legend','','Рабочие дни'));for(const [i,label]of [[1,'Пн'],[2,'Вт'],[3,'Ср'],[4,'Чт'],[5,'Пт'],[6,'Сб'],[0,'Вс']]){const l=el('label'),c=el('input');c.type='checkbox';c.value=String(i);c.name='weekday';c.checked=s.weekdays.includes(i);l.append(c,el('span','',label));days.append(l);}form.append(days);
 const lunch=el('div','form-pair'),ls=input('lunchStart',s.lunchStart,'time'),le=input('lunchEnd',s.lunchEnd,'time');ls.step=le.step='1800';lunch.append(field('Начало перерыва',ls),field('Конец перерыва',le));form.append(lunch,el('p','field-hint','Для работы без перерыва очистите оба поля.'));
 const capacity=select([[1,'1 пост'],[2,'2 поста'],[3,'3 поста'],[4,'4 поста']],s.capacity);form.append(field('Одновременная загрузка',capacity));const err=errorBox(),save=el('button','button','Сохранить расписание');save.type='submit';save.style.marginTop='22px';form.append(err,save);form.onsubmit=async e=>{e.preventDefault();save.disabled=true;err.textContent='';try{await authorized('/admin/settings',{method:'PUT',body:JSON.stringify({open:open.value,close:close.value,lunchStart:ls.value,lunchEnd:le.value,weekdays:[...days.querySelectorAll('input:checked')].map(c=>Number(c.value)),capacity:Number(capacity.value)})});notify('Расписание сохранено');await load();}catch(error){err.textContent=error.message;}finally{save.disabled=false;}};card.append(form);layout.append(card);
-const side=el('div','settings-side'),telegram=el('section','admin-card settings-card');telegram.append(el('div','integration-icon','↗'),el('h2','','Telegram'),el('p','settings-description',state.telegram.configured?'Бот подключён. Новые онлайн-заявки отправляются в рабочую группу.':'Бот пока не подключён. Заявки сохраняются и доступны в кабинете.'));telegram.append(el('p','integration-state',state.telegram.configured?'● Подключён':'○ Ожидает подключения'));
+const side=el('div','settings-side'),telegram=el('section','admin-card settings-card');telegram.append(integrationIcon(),el('h2','','Telegram'),el('p','settings-description',state.telegram.configured?'Бот подключён. Новые онлайн-заявки отправляются в рабочую группу.':'Бот пока не подключён. Заявки сохраняются и доступны в кабинете.'));const integrationState=el('p','integration-state');integrationState.append(icon(state.telegram.configured?'circle-check':'circle'),document.createTextNode(state.telegram.configured?' Подключён':' Ожидает подключения'));telegram.append(integrationState);
 if(state.telegram.failed)telegram.append(el('p','form-error','Не доставлено уведомлений: '+state.telegram.failed));
 if(state.telegram.configured)telegram.append(button('Повторить неотправленные','button button-outline button-small',async()=>{try{await authorized('/admin/notifications/retry',{method:'POST'});notify('Уведомления поставлены в очередь');await load();}catch(e){notify(e.message);}}));
 side.append(telegram);
@@ -98,3 +100,4 @@ blocks.append(button('+ Добавить перерыв','button button-outline 
 }
 setInterval(()=>{if(token&&!document.hidden&&!document.querySelector('dialog[open]')&&!['INPUT','SELECT','TEXTAREA'].includes(document.activeElement?.tagName))void load(true);},30000);
 if(token)void load();else login();
+

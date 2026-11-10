@@ -26,3 +26,5 @@
 }
 
 .password-control{position:relative;min-width:0}.field .password-control input{padding-right:112px}.password-visibility{position:absolute;right:5px;top:5px;bottom:5px;min-width:96px;border:0;border-radius:6px;padding:0 10px;background:#edf2e3;color:var(--ink);font-size:14px;font-weight:500;line-height:1.4}.password-visibility:hover{background:#e0ebcc}.password-visibility:focus-visible{outline-offset:1px}
+
+.nav-item>span .ui-icon{width:21px;height:21px}.integration-icon .ui-icon{width:30px;height:30px}.integration-state{display:flex;align-items:center;gap:7px}.integration-state .ui-icon{width:16px;height:16px}.dialog-close,.calendar-arrow{display:inline-grid;place-items:center}.dialog-close .ui-icon,.calendar-arrow .ui-icon{width:20px;height:20px}.table-open{display:inline-flex;align-items:center;gap:5px}.admin-empty>span .ui-icon{width:40px;height:40px}

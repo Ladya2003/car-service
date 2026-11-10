@@ -1,3 +1,4 @@
+import { iconText } from './lib/icons.js';
 import { api, money, dateLabel, element as el, requestId } from './lib/api.js';
 const panel=document.querySelector('#booking-panel');
 const state={config:null,step:1,serviceId:'',date:'',time:'',slots:[],loading:false,name:'',phone:'',car:'',comment:'',consent:false,requestId:requestId(),error:'',sending:false,receipt:null};
@@ -51,7 +52,7 @@ const error=el('div','form-error',state.error);error.setAttribute('role','alert'
 const box=el('div','panel-actions'),back=el('button','back-button','← Назад'),send=el('button','button',state.sending?'Отправляем…':'Оставить тестовую заявку ↗');back.type='button';back.disabled=state.sending;back.onclick=()=>{state.step=2;void loadSlots();};send.type='submit';send.disabled=state.sending;box.append(back,send);form.append(box);
 form.onsubmit=async event=>{event.preventDefault();if(state.sending||!form.reportValidity())return;state.sending=true;state.error='';send.disabled=true;send.textContent='Отправляем…';try{const result=await api('/bookings',{method:'POST',body:JSON.stringify({serviceId:state.serviceId,date:state.date,time:state.time,phone:state.phone,name:state.name,car:state.car,comment:state.comment,consent:state.consent,website:hp.value,requestId:state.requestId})});state.receipt=result.booking;render();}
 catch(e){if(e.status===409){state.time='';state.step=2;await loadSlots();showError(e.message);}else showError(e.message);}
-finally{state.sending=false;panel.setAttribute("aria-busy","false");if(!state.receipt){send.disabled=false;send.textContent='Оставить тестовую заявку ↗';}}};
+finally{state.sending=false;panel.setAttribute("aria-busy","false");if(!state.receipt){send.disabled=false;send.replaceChildren(...iconText('Оставить тестовую заявку ↗'));}}};
 panel.append(form);return;
 }
 const error=el('div','form-error',state.error);error.setAttribute('role','alert');panel.append(error);
